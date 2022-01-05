@@ -8,7 +8,6 @@ class FriendlyChatApp extends StatelessWidget {
   const FriendlyChatApp({
     Key? key,
   }) : super(key: key);
-  final _name = "Imam Hasan";
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(title: "Messenger App", home: ChatScreen());
@@ -17,6 +16,7 @@ class FriendlyChatApp extends StatelessWidget {
 
 class ChatMessage extends StatelessWidget {
   const ChatMessage({required this.text, Key? key}) : super(key: key);
+  final String _name = "Imam Hasan";
   final String text;
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class ChatMessage extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(_name[0], style: Theme.of(context).textTheme.headline4),
+              Text(_name, style: Theme.of(context).textTheme.headline6),
               Container(
                 margin: const EdgeInsets.only(top: 5.0),
                 child: Text(text),
@@ -53,7 +53,11 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
+  final List<ChatMessage> _messages = [];
   final _textController = TextEditingController();
+
+  // ignore: prefer_typing_uninitialized_variables
+  var _focusNode;
   Widget _buildTextComposer() {
     return IconTheme(
         data: IconThemeData(color: Theme.of(context).colorScheme.secondary),
@@ -67,6 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   onSubmitted: _handleSubmitted,
                   decoration:
                       const InputDecoration.collapsed(hintText: 'Send Message'),
+                      focusNode: _focusNode,
                 ),
               ),
               Container(
@@ -87,11 +92,31 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: const Text("Messenger Chats"),
       ),
-      body: _buildTextComposer(),
-    );
-  }
+      body: Column(
+        children: [
+            Flexible(child: ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              reverse: true,
+              itemBuilder: (_, index) => _messages[index],
+              itemCount: _messages.length,
+            ),
+          ),
+          const Divider(height: 1.0),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).cardColor,),
+              child: _buildTextComposer(),
+            ),
+          ]),
+        );
+      }
 
-  void _handleSubmitted(String value) {
+  void _handleSubmitted(String text) {
     _textController.clear();
+    var message = ChatMessage(text: text);
+    setState(() {
+      _messages.insert(0, message) ;
+    });
+    _focusNode.requestFocus();
   }
 }
